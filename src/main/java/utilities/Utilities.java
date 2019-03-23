@@ -7,13 +7,12 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import utilities.PropertyFileReader;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
-public class Utilites {
+public class Utilities {
 
     private WebDriver driver;
     private PropertyFileReader propertyFileReader = new PropertyFileReader();
@@ -48,4 +47,5 @@ public class Utilites {
 
         }
     }
+
 }

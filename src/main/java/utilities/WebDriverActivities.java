@@ -2,15 +2,20 @@ package utilities;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.ForkRepoPage;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class WebDriverActivities {
     private WebDriver driver;
-    final static Logger logger = Logger.getLogger(ForkRepoPage.class);
+    private final static Logger logger = Logger.getLogger(ForkRepoPage.class);
+    private Set<String> windowHandle = new HashSet<>();
 
     public WebDriverActivities(WebDriver driver) {
         this.driver = driver;
@@ -77,15 +82,128 @@ public class WebDriverActivities {
     }
 
     public void enterIntoField(String locatorValue, String locatorType, String value) {
-        logger.info("entering value for "+locatorValue);
+        logger.info("entering value for " + locatorValue);
         getElement(locatorValue, locatorType).clear();
         getElement(locatorValue, locatorType).sendKeys(value);
-        logger.info("entered an value "+value+" for an locator "+ locatorValue);
+        logger.info("entered an value " + value + " for an locator " + locatorValue);
     }
 
     public void submit(String locatorValue, String locatorType) {
-        logger.info("submitting the "+locatorValue);
+        logger.info("submitting the " + locatorValue);
         getElement(locatorValue, locatorType).submit();
         logger.info("submitted the " + locatorValue);
     }
+
+    public void waitForElementTobeClickable(String locatorValue, String locatorType, int timeout) {
+        WebDriverWait wait = getWebDriverWaitInstance(timeout);
+        wait.until(ExpectedConditions.elementToBeClickable(getElementBy(locatorValue, locatorType)));
+    }
+
+    public void waitForElementTobeLocated(String locatorValue, String locatorType, int timeout) {
+        WebDriverWait wait = getWebDriverWaitInstance(timeout);
+        wait.until(ExpectedConditions.presenceOfElementLocated(getElementBy(locatorValue, locatorType)));
+    }
+
+    public void waitForElementTobeLocated(By by, int timeout) {
+        WebDriverWait wait = getWebDriverWaitInstance(timeout);
+        wait.until(ExpectedConditions.presenceOfElementLocated(by));
+    }
+
+    public void waitUntilStalenessOfLocator(WebElement element, int timeout) {
+        WebDriverWait wait = getWebDriverWaitInstance(timeout);
+        wait.until(ExpectedConditions.refreshed(ExpectedConditions.stalenessOf(element)));
+    }
+
+    public boolean isNotStale(String locator, String locatorType) {
+        int counter = 0;
+        do {
+            try {
+                if (getElement(locator, locatorType).isEnabled() && getElement(locator, locatorType).isDisplayed()) {
+                    counter = counter++;
+                    clickOnElement(locator, locatorType);
+                    return true;
+                }
+            } catch (Exception ex) {
+            }
+        } while (counter == 0);
+
+        return false;
+    }
+
+    public void clickOnStaleElement(By by) {
+        int count = 0;
+        while (count < 10) {
+            try {
+                WebElement staledElement = driver.findElement(by);
+                Thread.sleep(1000);
+                staledElement.click();
+                break;
+            } catch (StaleElementReferenceException e) {
+                count = count + 1;
+            } catch (InterruptedException ex1) {
+            }
+        }
+    }
+
+    public void refreshPage() {
+        driver.navigate().refresh();
+    }
+
+    public void navigateToForward() {
+        driver.navigate().forward();
+    }
+
+    public void navigateToBackward() {
+        driver.navigate().back();
+    }
+
+    public void acceptAlert() {
+        driver.switchTo().alert().accept();
+    }
+
+    public void closeAlert() {
+        driver.switchTo().alert().dismiss();
+    }
+
+    public String getTextOfAlert() {
+        return driver.switchTo().alert().getText();
+    }
+
+    public void switchToFrame(String id) {
+        driver.switchTo().frame(id);
+    }
+
+    public void switchToFrame(int frame) {
+        driver.switchTo().frame(frame);
+    }
+
+    public void switchToFrame(WebElement element) {
+        driver.switchTo().frame(element);
+    }
+
+    public void switchToParentFrame() {
+        driver.switchTo().parentFrame();
+    }
+
+    public void switchToDefaultContent() {
+        driver.switchTo().defaultContent();
+    }
+
+    public Set<String> getWindowHandles() {
+        windowHandle = driver.getWindowHandles();
+        return windowHandle;
+    }
+
+    public void switchToSpecificWindow(String window) {
+        driver.switchTo().window(window);
+    }
+
+    public void closeCurrentTab() {
+        driver.close();
+    }
+
+    public String getTitle() {
+        return driver.getTitle();
+    }
+
 }

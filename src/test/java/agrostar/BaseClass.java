@@ -1,11 +1,12 @@
 package agrostar;
 
 import factory.PageFactory;
+import org.apache.log4j.BasicConfigurator;
 import org.openqa.selenium.WebDriver;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
 import utilities.PropertyFileReader;
-import utilities.Utilites;
+import utilities.Utilities;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -14,7 +15,7 @@ import java.util.Properties;
 public class BaseClass {
     private WebDriver driver;
     private static PropertyFileReader propertyFileReader = new PropertyFileReader();
-    private Utilites utilites = new Utilites();
+    private Utilities utilites = new Utilities();
     private PageFactory pageFactory;
 
     static Properties property;
@@ -25,6 +26,7 @@ public class BaseClass {
 
     @BeforeSuite
     public void setUp() {
+        BasicConfigurator.configure();
         driver = utilites.getDriver();
     }
 
@@ -59,7 +61,6 @@ public class BaseClass {
 
     @AfterSuite
     public void tearDown() {
-        driver.close();
         driver.quit();
     }
 
