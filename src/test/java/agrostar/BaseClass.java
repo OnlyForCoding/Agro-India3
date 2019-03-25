@@ -33,7 +33,6 @@ public class BaseClass {
     @BeforeTest
     public void beforeTest() {
         driver.get(property.getProperty("url"));
-        driver.manage().window().fullscreen();
     }
 
     @BeforeClass

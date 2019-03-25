@@ -21,10 +21,20 @@ public class WebDriverActivities {
         this.driver = driver;
     }
 
-    public WebElement getElement(String locatorValue, String locatorType) {
-        String locator = locatorType.toUpperCase();
+    public WebElement getElement(String locatorFromPropFile) {
+
+        String locatorType = "";
         WebElement element = null;
-        switch (locator) {
+        String locatorValue = "";
+
+        if (locatorFromPropFile.contains(":")){
+            locatorType  = locatorFromPropFile.split(":::")[0].toUpperCase();
+            locatorValue = locatorFromPropFile.split(":::")[1];
+        }else{
+            throw new RuntimeException("Locator format does not contains colon");
+        }
+
+        switch (locatorType) {
             case "ID":
                 element = driver.findElement(By.id(locatorValue));
                 break;
@@ -44,10 +54,20 @@ public class WebDriverActivities {
         return element;
     }
 
-    public By getElementBy(String locatorValue, String locatorType) {
-        String locator = locatorType.toUpperCase();
+    public By getElementBy(String locatorFromPropFile) {
+
+        String locatorType = "";
+        String locatorValue = "";
         By by = null;
-        switch (locator) {
+
+        if (locatorFromPropFile.contains(":")){
+            locatorType  = locatorFromPropFile.split(":::")[0].toUpperCase();
+            locatorValue = locatorFromPropFile.split(":::")[1];
+        }else{
+            throw new RuntimeException("Locator format does not contains colon");
+        }
+
+        switch (locatorType) {
             case "ID":
                 by = By.id(locatorValue);
                 break;
@@ -64,44 +84,46 @@ public class WebDriverActivities {
         return by;
     }
 
-    public void clickOnElement(String locatorValue, String locatorType) {
-        logger.info("Clicking on an element " + locatorValue);
-        getElement(locatorValue, locatorType).click();
-        logger.info("Clicked on an element : " + locatorValue);
+    public void clickOnElement(String locatorFromPropFile) {
+        try {
+            getElement(locatorFromPropFile).click();
+        } catch (StaleElementReferenceException ex){
+            clickOnStaleElement(getElementBy(locatorFromPropFile));
+        }
     }
 
-    public void waitForElementToBePresent(String locatorValue, String locatorType, int timeout) {
-        logger.info("waiting for an element to be present " + locatorValue);
+    public void waitForElementToBePresent(String locatorFromPropFile, int timeout) {
+        logger.info("waiting for an element to be present " + locatorFromPropFile);
         WebDriverWait wait = getWebDriverWaitInstance(timeout);
-        wait.until(ExpectedConditions.presenceOfElementLocated(getElementBy(locatorValue, locatorType)));
-        logger.info("waited for an element " + locatorValue + " for " + timeout + " seconds");
+        wait.until(ExpectedConditions.presenceOfElementLocated(getElementBy(locatorFromPropFile)));
+        logger.info("waited for an element " + locatorFromPropFile + " for " + timeout + " seconds");
     }
 
     public WebDriverWait getWebDriverWaitInstance(int timeout) {
         return new WebDriverWait(driver, timeout);
     }
 
-    public void enterIntoField(String locatorValue, String locatorType, String value) {
-        logger.info("entering value for " + locatorValue);
-        getElement(locatorValue, locatorType).clear();
-        getElement(locatorValue, locatorType).sendKeys(value);
-        logger.info("entered an value " + value + " for an locator " + locatorValue);
+    public void enterIntoField(String locatorFromPropFile, String value) {
+        logger.info("entering value for " + locatorFromPropFile);
+        getElement(locatorFromPropFile).clear();
+        getElement(locatorFromPropFile).sendKeys(value);
+        logger.info("entered an value " + value + " for an locator " + locatorFromPropFile);
     }
 
-    public void submit(String locatorValue, String locatorType) {
-        logger.info("submitting the " + locatorValue);
-        getElement(locatorValue, locatorType).submit();
-        logger.info("submitted the " + locatorValue);
+    public void submit(String locatorFromPropFile) {
+        logger.info("submitting the " + locatorFromPropFile);
+        getElement(locatorFromPropFile).submit();
+        logger.info("submitted the " + locatorFromPropFile);
     }
 
-    public void waitForElementTobeClickable(String locatorValue, String locatorType, int timeout) {
+    public void waitForElementTobeClickable(String locatorFromPropFile, int timeout) {
         WebDriverWait wait = getWebDriverWaitInstance(timeout);
-        wait.until(ExpectedConditions.elementToBeClickable(getElementBy(locatorValue, locatorType)));
+        wait.until(ExpectedConditions.elementToBeClickable(getElementBy(locatorFromPropFile)));
     }
 
-    public void waitForElementTobeLocated(String locatorValue, String locatorType, int timeout) {
+    public void waitForElementTobeLocated(String locatorFromPropFile, int timeout) {
         WebDriverWait wait = getWebDriverWaitInstance(timeout);
-        wait.until(ExpectedConditions.presenceOfElementLocated(getElementBy(locatorValue, locatorType)));
+        wait.until(ExpectedConditions.presenceOfElementLocated(getElementBy(locatorFromPropFile)));
     }
 
     public void waitForElementTobeLocated(By by, int timeout) {
@@ -114,13 +136,13 @@ public class WebDriverActivities {
         wait.until(ExpectedConditions.refreshed(ExpectedConditions.stalenessOf(element)));
     }
 
-    public boolean isNotStale(String locator, String locatorType) {
+    public boolean isNotStale(String locatorFromPropFile) {
         int counter = 0;
         do {
             try {
-                if (getElement(locator, locatorType).isEnabled() && getElement(locator, locatorType).isDisplayed()) {
+                if (getElement(locatorFromPropFile).isEnabled() && getElement(locatorFromPropFile).isDisplayed()) {
                     counter = counter++;
-                    clickOnElement(locator, locatorType);
+                    clickOnElement(locatorFromPropFile);
                     return true;
                 }
             } catch (Exception ex) {
