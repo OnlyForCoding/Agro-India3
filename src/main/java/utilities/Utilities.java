@@ -30,13 +30,12 @@ public class Utilities {
     private PropertyFileReader propertyFileReader = new PropertyFileReader();
     private Properties properties = propertyFileReader.getProperties("setUp");
     private String browser;
-    private String system;
-    private String ipAddress;
-    private DesiredCapabilities desiredCapabilities;
+    private String browserVersion;
 
     public WebDriver getDriver() {
-
+        browserVersion = System.getProperty("version");
         browser = System.getProperty("browser");
+
         if (browser == null || browser.equals("")) {
             browser = properties.getProperty("browser");
         }
@@ -49,21 +48,29 @@ public class Utilities {
             driver = getIeDriver();
         }
 
+        driver.get(properties.getProperty("url"));
         return driver;
     }
 
-    public void takeScreenShot(WebDriver driver, String screenShotName) {
+    public String takeScreenShot(WebDriver driver, String screenShotName) {
         File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
         try {
-            FileUtils.copyFile(src, new File("target/screenshot/" + screenShotName + ".png"));
+            FileUtils.copyFile(src, new File("target/AgroStar-Automation/screenshot/" + screenShotName + ".png"));
         } catch (IOException e) {
             System.out.println(e.getMessage());
 
         }
+        return "target/screenshot/"+screenShotName+".png";
     }
 
-    public WebDriver getChromeDriver() {
-        WebDriverManager.chromedriver().forceCache().setup();
+    private WebDriver getChromeDriver() {
+        if (browserVersion == null || browserVersion.equalsIgnoreCase("")){
+            WebDriverManager.chromedriver().forceCache().setup();
+        }else {
+            System.out.println(" Browser version "+WebDriverManager.chromedriver().getDownloadedVersion());
+            WebDriverManager.chromedriver().version(browserVersion).forceCache().setup();
+        }
+        //WebDriverManager.chromedriver().version("73").forceCache().setup();
         ChromeOptions chromeOptions = new ChromeOptions();
         HashMap<String, Object> chromePrefs = new HashMap<>();
         chromePrefs.put("download.default_directory", System.getProperty("user.dir") + "/target");
@@ -87,6 +94,11 @@ public class Utilities {
     }
 
     private WebDriver getFirefoxDriver() {
+        if (browserVersion == null || browserVersion.equalsIgnoreCase("")){
+            WebDriverManager.chromedriver().forceCache().setup();
+        }else {
+            WebDriverManager.chromedriver().version(browserVersion).forceCache().setup();
+        }
         FirefoxDriverManager.getInstance().forceCache().setup();
         FirefoxProfile profile = new FirefoxProfile();
         profile.setAssumeUntrustedCertificateIssuer(true);

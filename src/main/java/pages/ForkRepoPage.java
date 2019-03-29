@@ -26,7 +26,6 @@ public class ForkRepoPage {
 
     public void signIn(String username, String password) {
         logger.info("Signing In");
-        webDriverActivities.clickOnElement(locators.getProperty("loginBtnOnHdr"));
         webDriverActivities.enterIntoField(locators.getProperty("username"), username);
         webDriverActivities.enterIntoField(locators.getProperty("password"),  password);
         webDriverActivities.clickOnElement(locators.getProperty("loginBtn"));
@@ -57,5 +56,16 @@ public class ForkRepoPage {
             driver.navigate().back();
             driver.navigate().back();
         }
+    }
+
+    public boolean isUserNotLoggedIn(){
+        return webDriverActivities.isElementPresent(locators.getProperty("txtLoginFail"));
+    }
+
+    public String getErrorMessageWhileLogin(){
+        if (webDriverActivities.isElementPresent(locators.getProperty("txtLoginFail"))){
+            return webDriverActivities.getElement(locators.getProperty("txtLoginFail")).getText();
+        }
+        return null;
     }
 }
