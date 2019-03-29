@@ -8,6 +8,7 @@ import org.testng.Assert;
 import utilities.PropertyFileReader;
 import utilities.WebDriverActivities;
 
+import java.util.List;
 import java.util.Properties;
 
 public class ForkRepoPage {
@@ -27,7 +28,7 @@ public class ForkRepoPage {
     public void signIn(String username, String password) {
         logger.info("Signing In");
         webDriverActivities.enterIntoField(locators.getProperty("username"), username);
-        webDriverActivities.enterIntoField(locators.getProperty("password"),  password);
+        webDriverActivities.enterIntoField(locators.getProperty("password"), password);
         webDriverActivities.clickOnElement(locators.getProperty("loginBtn"));
         logger.info("Signed In Successfully");
     }
@@ -51,21 +52,46 @@ public class ForkRepoPage {
             webDriverActivities.clickOnStaleElement(By.xpath("//ul[@class='repo-list']//li[" + i + "]//a"));
             webDriverActivities.waitForElementTobeClickable(locators.getProperty("forkBtn"), 10);
             webDriverActivities.clickOnElement(locators.getProperty("forkBtn"));
-            webDriverActivities.waitForElementToBePresent(locators.getProperty("isProjectForked"),10);
+            webDriverActivities.waitForElementToBePresent(locators.getProperty("isProjectForked"), 10);
             Assert.assertTrue(driver.findElement(By.xpath("//span[contains(text(),'forked from')]")).isDisplayed());
             driver.navigate().back();
             driver.navigate().back();
         }
     }
 
-    public boolean isUserNotLoggedIn(){
+    public boolean isUserNotLoggedIn() {
         return webDriverActivities.isElementPresent(locators.getProperty("txtLoginFail"));
     }
 
-    public String getErrorMessageWhileLogin(){
-        if (webDriverActivities.isElementPresent(locators.getProperty("txtLoginFail"))){
+    public String getErrorMessageWhileLogin() {
+        if (webDriverActivities.isElementPresent(locators.getProperty("txtLoginFail"))) {
             return webDriverActivities.getElement(locators.getProperty("txtLoginFail")).getText();
         }
         return null;
+    }
+
+    public boolean isSortedRepoByMostStar() {
+        int staredCount = 0;
+        int previousStaredCount = 0;
+        String staredCountOnStr = "";
+        List<WebElement> elements = webDriverActivities.getElements(locators.getProperty("lnkStarSorted"));
+        for (int i = elements.size() - 1; i>=0; i--) {
+            WebElement e = elements.get(i);
+            webDriverActivities.clickOnStaleElement(e);
+            webDriverActivities.waitForElementToBePresent(locators.getProperty("staredCount"), 10);
+            staredCountOnStr = webDriverActivities.getElement(locators.getProperty("staredCount")).getText();
+            if (staredCountOnStr.contains(",")) {
+                staredCountOnStr = staredCountOnStr.replaceAll(",", "");
+            }
+            staredCount = Integer.parseInt(staredCountOnStr);
+            if (staredCount > previousStaredCount) {
+                previousStaredCount = staredCount;
+                webDriverActivities.navigateToBackward();
+            } else {
+                logger.error("Stared count is not greater than last repository present in the Sorting order");
+                return false;
+            }
+        }
+        return true;
     }
 }

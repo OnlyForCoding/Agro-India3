@@ -7,6 +7,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.ForkRepoPage;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class WebDriverActivities {
@@ -24,7 +25,7 @@ public class WebDriverActivities {
         WebElement element = null;
         String locatorValue = "";
 
-        if (locatorFromPropFile.contains(":")){
+        if (locatorFromPropFile.contains(":::")){
             locatorType  = locatorFromPropFile.split(":::")[0].toUpperCase();
             locatorValue = locatorFromPropFile.split(":::")[1];
         }else{
@@ -51,13 +52,46 @@ public class WebDriverActivities {
         return element;
     }
 
+    public List<WebElement> getElements(String locatorFromPropFile) {
+
+        String locatorType = "";
+        List<WebElement> element = null;
+        String locatorValue = "";
+
+        if (locatorFromPropFile.contains(":::")){
+            locatorType  = locatorFromPropFile.split(":::")[0].toUpperCase();
+            locatorValue = locatorFromPropFile.split(":::")[1];
+        }else{
+            throw new RuntimeException("Locator format does not contains colon");
+        }
+
+        switch (locatorType) {
+            case "ID":
+                element = driver.findElements(By.id(locatorValue));
+                break;
+            case "XPATH":
+                element = driver.findElements(By.xpath(locatorValue));
+                break;
+            case "CLASS":
+                element = driver.findElements(By.className(locatorValue));
+                break;
+            case "NAME":
+                element = driver.findElements(By.name(locatorValue));
+                break;
+            default:
+                throw new RuntimeException("Locator type passed is not matching with expected type");
+
+        }
+        return element;
+    }
+
     public By getElementBy(String locatorFromPropFile) {
 
         String locatorType = "";
         String locatorValue = "";
         By by = null;
 
-        if (locatorFromPropFile.contains(":")){
+        if (locatorFromPropFile.contains(":::")){
             locatorType  = locatorFromPropFile.split(":::")[0].toUpperCase();
             locatorValue = locatorFromPropFile.split(":::")[1];
         }else{
@@ -168,6 +202,20 @@ public class WebDriverActivities {
                 WebElement staledElement = driver.findElement(by);
                 Thread.sleep(1000);
                 staledElement.click();
+                break;
+            } catch (StaleElementReferenceException e) {
+                count = count + 1;
+            } catch (InterruptedException ex1) {
+            }
+        }
+    }
+
+    public void clickOnStaleElement(WebElement element) {
+        int count = 0;
+        while (count < 10) {
+            try {
+                Thread.sleep(1000);
+                element.click();
                 break;
             } catch (StaleElementReferenceException e) {
                 count = count + 1;
