@@ -18,10 +18,12 @@ public class LoginTests extends BaseClass {
             Assert.assertTrue(forkRepoPage.isUserNotLoggedIn(), description);
             extentTest.log(LogStatus.INFO, "Unable to login with username : " + username + " and password " + password);
             Assert.assertEquals(forkRepoPage.getErrorMessageWhileLogin(), "Incorrect username or password.", "Error message is not matching");
-            extentTest.log(LogStatus.INFO, "Getting error message as Incorrect username or password.");
+            extentTest.log(LogStatus.PASS, "Verified that Error message is showing for "+description);
             flag = true;
         } catch (Throwable t) {
             extentTest.log(LogStatus.FAIL, t.getMessage());
+            System.out.println(t.getMessage());
+
         }
 
         if (!flag){

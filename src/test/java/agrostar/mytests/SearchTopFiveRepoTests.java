@@ -23,10 +23,11 @@ public class SearchTopFiveRepoTests extends BaseClass {
             forkRepoPage.sortByMostStar();
             extentTest.log(LogStatus.INFO, "Forking the Repositories one after another");
             forkRepoPage.forkItAndVerify();
-            extentTest.log(LogStatus.INFO, "Verifed that all the repositories are forked successfully");
+            extentTest.log(LogStatus.PASS, "Verified that all the repositories are forked successfully");
             flag = true;
         } catch (Throwable throwable){
             extentTest.log(LogStatus.FAIL, throwable.getMessage());
+            System.out.println(throwable.getMessage());
         }
 
         if (!flag){

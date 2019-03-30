@@ -39,11 +39,13 @@ public class ForkRepoPage {
         webDriverActivities.waitForElementToBePresent(locators.getProperty("searched_language_link"), 10);
         webDriverActivities.waitForElementTobeClickable(locators.getProperty("searched_language_link"), 10);
         webDriverActivities.clickOnElement(locators.getProperty("searched_language_link"));
+        webDriverActivities.waitFor(1);
     }
 
     public void sortByMostStar() {
         webDriverActivities.clickOnElement(locators.getProperty("drpDwnBestMatch"));
         webDriverActivities.clickOnElement(locators.getProperty("optionsMostStar"));
+        webDriverActivities.waitFor(1);
     }
 
     public void forkItAndVerify() {
@@ -72,26 +74,64 @@ public class ForkRepoPage {
 
     public boolean isSortedRepoByMostStar() {
         int staredCount = 0;
-        int previousStaredCount = 0;
+        int priviousCount = 0;
+        boolean flag = false;
         String staredCountOnStr = "";
-        List<WebElement> elements = webDriverActivities.getElements(locators.getProperty("lnkStarSorted"));
-        for (int i = elements.size() - 1; i>=0; i--) {
-            WebElement e = elements.get(i);
-            webDriverActivities.clickOnStaleElement(e);
-            webDriverActivities.waitForElementToBePresent(locators.getProperty("staredCount"), 10);
+        for (int i = 5; i > 0; i--) {
+            webDriverActivities.clickOnStaleElement(By.xpath("//ul[@class='repo-list']//li[" + i + "]//a"));
+            webDriverActivities.waitForElementTobeClickable(locators.getProperty("forkBtn"), 10);
             staredCountOnStr = webDriverActivities.getElement(locators.getProperty("staredCount")).getText();
             if (staredCountOnStr.contains(",")) {
                 staredCountOnStr = staredCountOnStr.replaceAll(",", "");
             }
             staredCount = Integer.parseInt(staredCountOnStr);
-            if (staredCount > previousStaredCount) {
-                previousStaredCount = staredCount;
-                webDriverActivities.navigateToBackward();
+
+            if (priviousCount < staredCount) {
+                flag = true;
             } else {
-                logger.error("Stared count is not greater than last repository present in the Sorting order");
-                return false;
+                flag = false;
             }
+
+            webDriverActivities.navigateToBackward();
+
         }
-        return true;
+        return flag;
+    }
+
+    public boolean isRepoSelfStar() {
+        int staredCount = 0;
+        String staredCountOnStr = "";
+        int updatedStarCount = 0;
+        webDriverActivities.clickOnStaleElement(By.xpath("//ul[@class='repo-list']//li[1]//a"));
+        if (!webDriverActivities.getElement(locators.getProperty("starButton")).getText().equalsIgnoreCase("star")) {
+            logger.info("In star the Repo");
+            unStarRepo();
+            webDriverActivities.waitFor(2);
+        }
+        webDriverActivities.waitForElementToBePresent(locators.getProperty("staredCount"), 10);
+        staredCountOnStr = webDriverActivities.getElement(locators.getProperty("staredCount")).getText();
+        if (staredCountOnStr.contains(",")) {
+            staredCountOnStr = staredCountOnStr.replaceAll(",", "");
+        }
+        staredCount = Integer.parseInt(staredCountOnStr);
+        logger.info("Starred Count is : " + staredCount);
+        webDriverActivities.clickOnElement(locators.getProperty("starButton"));
+        webDriverActivities.waitFor(2);
+        // updated starred count
+        staredCountOnStr = webDriverActivities.getElement(locators.getProperty("starredCountAfterSelfStar")).getText();
+        if (staredCountOnStr.contains(",")) {
+            staredCountOnStr = staredCountOnStr.replaceAll(",", "");
+        }
+        updatedStarCount = Integer.parseInt(staredCountOnStr);
+        logger.info("Updated Count is :" + updatedStarCount);
+        if ((updatedStarCount == staredCount + 1)
+                && webDriverActivities.getElement(locators.getProperty("unstarButton")).isDisplayed()) {
+            return true;
+        }
+        return false;
+    }
+
+    public void unStarRepo() {
+        webDriverActivities.clickOnElement(locators.getProperty("unstarButton"));
     }
 }

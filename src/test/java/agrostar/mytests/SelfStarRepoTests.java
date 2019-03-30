@@ -2,17 +2,15 @@ package agrostar.mytests;
 
 import agrostar.BaseClass;
 import com.relevantcodes.extentreports.LogStatus;
-import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import pages.ForkRepoPage;
 
-public class CheckForMostStarRepoTests extends BaseClass {
+public class SelfStarRepoTests extends BaseClass {
     private ForkRepoPage forkRepoPage;
-    private final Logger logger = Logger.getLogger(CheckForMostStarRepoTests.class);
 
     @Test
-    public void checkForMostStarRepo() {
+    public void selfStar() {
         boolean flag = false;
         try {
             extentTest.log(LogStatus.INFO, "Loging in");
@@ -24,17 +22,17 @@ public class CheckForMostStarRepoTests extends BaseClass {
             extentTest.log(LogStatus.INFO, "Searched for Programming language Java in search Box");
             extentTest.log(LogStatus.INFO, "Sorting the repositories by Most Star");
             forkRepoPage.sortByMostStar();
-            Assert.assertTrue(forkRepoPage.isSortedRepoByMostStar(), "Failing to sort it properly :-)");
-            extentTest.log(LogStatus.PASS, "Checked that the searched Repo's are sorted properly");
+            Assert.assertTrue(forkRepoPage.isRepoSelfStar(), "Failed self star the repo..");
+            extentTest.log(LogStatus.PASS, "Successfully starred the Repo");
+            forkRepoPage.unStarRepo();
             flag = true;
-        } catch (Throwable throwable){
+        } catch (Throwable throwable) {
             extentTest.log(LogStatus.FAIL, throwable.getMessage());
-            logger.info(throwable.getMessage());
-
+            System.out.println(throwable.getMessage());
         }
 
-        if (!flag){
-            Assert.assertTrue(flag, "Search For Top Five Repo is failing");
+        if (!flag) {
+            Assert.assertTrue(flag, "Starring the Repo is failing");
         }
     }
 }
