@@ -1,15 +1,13 @@
 package utilities;
 
 import org.apache.log4j.Logger;
-import org.openqa.selenium.By;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.ForkRepoPage;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class WebDriverActivities {
@@ -27,10 +25,10 @@ public class WebDriverActivities {
         WebElement element = null;
         String locatorValue = "";
 
-        if (locatorFromPropFile.contains(":")){
-            locatorType  = locatorFromPropFile.split(":::")[0].toUpperCase();
+        if (locatorFromPropFile.contains(":::")) {
+            locatorType = locatorFromPropFile.split(":::")[0].toUpperCase();
             locatorValue = locatorFromPropFile.split(":::")[1];
-        }else{
+        } else {
             throw new RuntimeException("Locator format does not contains colon");
         }
 
@@ -54,16 +52,49 @@ public class WebDriverActivities {
         return element;
     }
 
+    public List<WebElement> getElements(String locatorFromPropFile) {
+
+        String locatorType = "";
+        List<WebElement> element = null;
+        String locatorValue = "";
+
+        if (locatorFromPropFile.contains(":::")) {
+            locatorType = locatorFromPropFile.split(":::")[0].toUpperCase();
+            locatorValue = locatorFromPropFile.split(":::")[1];
+        } else {
+            throw new RuntimeException("Locator format does not contains colon");
+        }
+
+        switch (locatorType) {
+            case "ID":
+                element = driver.findElements(By.id(locatorValue));
+                break;
+            case "XPATH":
+                element = driver.findElements(By.xpath(locatorValue));
+                break;
+            case "CLASS":
+                element = driver.findElements(By.className(locatorValue));
+                break;
+            case "NAME":
+                element = driver.findElements(By.name(locatorValue));
+                break;
+            default:
+                throw new RuntimeException("Locator type passed is not matching with expected type");
+
+        }
+        return element;
+    }
+
     public By getElementBy(String locatorFromPropFile) {
 
         String locatorType = "";
         String locatorValue = "";
         By by = null;
 
-        if (locatorFromPropFile.contains(":")){
-            locatorType  = locatorFromPropFile.split(":::")[0].toUpperCase();
+        if (locatorFromPropFile.contains(":::")) {
+            locatorType = locatorFromPropFile.split(":::")[0].toUpperCase();
             locatorValue = locatorFromPropFile.split(":::")[1];
-        }else{
+        } else {
             throw new RuntimeException("Locator format does not contains colon");
         }
 
@@ -87,7 +118,7 @@ public class WebDriverActivities {
     public void clickOnElement(String locatorFromPropFile) {
         try {
             getElement(locatorFromPropFile).click();
-        } catch (StaleElementReferenceException ex){
+        } catch (StaleElementReferenceException ex) {
             clickOnStaleElement(getElementBy(locatorFromPropFile));
         }
     }
@@ -152,6 +183,18 @@ public class WebDriverActivities {
         return false;
     }
 
+    public boolean isElementPresent(String locatorFromPropFile) {
+        boolean isPresent = false;
+        try {
+            getElement(locatorFromPropFile).isDisplayed();
+            isPresent = true;
+        } catch (NoSuchElementException ex) {
+
+        }
+
+        return isPresent;
+    }
+
     public void clickOnStaleElement(By by) {
         int count = 0;
         while (count < 10) {
@@ -166,6 +209,44 @@ public class WebDriverActivities {
             }
         }
     }
+
+    public void clickOnStaleElement(WebElement element) {
+        int count = 0;
+        while (count < 10) {
+            try {
+                Thread.sleep(1000);
+                element.click();
+                break;
+            } catch (StaleElementReferenceException e) {
+                count = count + 1;
+                driver.navigate().refresh();
+            } catch (InterruptedException ex1) {
+            }
+        }
+    }
+
+
+    public void clickStaleElement(WebElement element, int waitTime) {
+        int counter = waitTime;
+        do {
+            try {
+                if (element.isEnabled() && element.isDisplayed()) {
+                    element.click();
+                    break;
+                }
+            } catch (Exception ex) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ie){
+
+                }
+                counter--;
+                System.out.println("waiting -- "+counter);
+            }
+        }
+        while (counter > 0);
+    }
+
 
     public void refreshPage() {
         driver.navigate().refresh();
@@ -226,6 +307,14 @@ public class WebDriverActivities {
 
     public String getTitle() {
         return driver.getTitle();
+    }
+
+    public void waitFor(int sec){
+        try {
+            Thread.sleep(sec * 1000);
+        } catch (InterruptedException ie){
+
+        }
     }
 
 }

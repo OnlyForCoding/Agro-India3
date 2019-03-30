@@ -14,7 +14,7 @@ public class PageFactory {
         this.driver = driver;
     }
 
-    public ForkRepoPage getForkRepoPage() {
+    public ForkRepoPage geForkRepoPage() {
         if (forkRepoPage == null){
             forkRepoPage = new ForkRepoPage(driver);
         }

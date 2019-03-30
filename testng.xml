@@ -1,9 +1,16 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="AgroTech" verbose="1" >
+    <listeners>
+        <!--<listener class-name="listeners.AnnotationTransformer"/>
+        <listener class-name="listeners.AgroTestListener"/>-->
+    </listeners>
     <test name="GitHub Challenge">
         <classes>
-            <class name="agrostar.TestGitHub"/>
+            <class name="agrostar.mytests.SearchTopFiveRepoTests"/>
+            <class name="agrostar.mytests.LoginTests"/>
+            <class name="agrostar.mytests.SelfStarRepoTests"/>
+            <class name="agrostar.mytests.CheckForMostStarRepoTests"/>
         </classes>
     </test>
 </suite>
